@@ -15,11 +15,23 @@ class profiled(object):
 
 class traced(object):
     def __init__(self, f):
-        self.__name__= f.__name__
-        self.f = f
-        self.next_line = ''
+      """
+      This is the ctor for the traced a decorator.
+      It defines the field next_line as an empty string. 
+      next_line is used to build up the progressive ASCII characters
+      that make up the outline. 
+      """
+      self.__name__ = f.__name__
+      self.f = f
+      self.next_line = ''
 
     def __call__(self, *args, **kwargs):
+      """
+      This function implements the behavior of the traced decorator.
+      Most of the logic builds up the out string which will be printed
+      after the function has returned. next_line is the beginning of out.
+      This function prints name parameters differently for clarity sake.
+      """
       out = self.next_line + ',- ' + self.__name__
       
       if len(args) == 1:
@@ -44,7 +56,9 @@ class traced(object):
         derp = self.f(*args)
       elif len(kwargs) > 0:
         derp = self.f(**kwargs)
-  
+ 
+      # slice next_line to regress the outline down
+      # to the final return value
       self.next_line = self.next_line[2:] 
       print self.next_line + '`- ' + str(derp)
       if len(self.next_line) == 0:
@@ -52,8 +66,35 @@ class traced(object):
       return derp
 
 class memoized(object):
-    def __init__(self,f):
-        self.__name__="NOT_IMPLEMENTED"
+    mem = { }
+    def __init__(self, f):
+        """
+        This is the ctor for the memoized decorator.
+        It assigns memoized's __name__ to the the function's and stores the function.
+        """
+        self.__name__ = f.__name__
+        self.f = f
+
+    def __call__(self, *args, **kwargs):
+      """
+      This function uses *args and **kwargs to create a unique key for the function call.
+      First a check is made to the internal dictionary for this key, if it exists, then
+      the stored value is immediately returned. Otherwise, the internal function f is called
+      using the whichever arguments are avaiable. The results are stored in the dictionary
+      for later use.
+      """
+      key = (self.__name__, str(args), str(kwargs))
+      if self.mem.has_key(key) == True:
+        return self.mem[key]
+      else:
+        out = ''
+        if len(args) > 0:
+          out = self.f(*args)
+        elif len(kwargs) > 0:
+          out = self.f(**kwargs)
+        self.mem[key] = out
+        return out
+
 
 # run some examples.  The output from this is in decorators.out
 def run_examples():
