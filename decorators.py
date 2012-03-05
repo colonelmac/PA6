@@ -14,13 +14,45 @@ class profiled(object):
         self.__count=0
 
 class traced(object):
-    def __init__(self,f):
-        # replace this and fill in the rest of the class
-        self.__name__="NOT_IMPLEMENTED"
+    def __init__(self, f):
+        self.__name__= f.__name__
+        self.f = f
+        self.next_line = ''
+
+    def __call__(self, *args, **kwargs):
+      out = self.next_line + ',- ' + self.__name__
+      
+      if len(args) == 1:
+        out += '(' + str(args[0]) + ')'
+      elif len(args) > 1:
+        out += str(args)
+      else:
+        out += '('
+        for i, key in enumerate(kwargs):
+          out += str(key) + '=' + str(kwargs[key])
+          if i != len(kwargs) - 1:
+            out += ', '
+        out += ')'
+
+      print out
+
+      self.next_line += '| '
+
+      derp = ''
+
+      if len(args) > 0:
+        derp = self.f(*args)
+      elif len(kwargs) > 0:
+        derp = self.f(**kwargs)
+  
+      self.next_line = self.next_line[2:] 
+      print self.next_line + '`- ' + str(derp)
+      if len(self.next_line) == 0:
+        print derp
+      return derp
 
 class memoized(object):
     def __init__(self,f):
-        # replace this and fill in the rest of the class
         self.__name__="NOT_IMPLEMENTED"
 
 # run some examples.  The output from this is in decorators.out
